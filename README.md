@@ -2,15 +2,10 @@ This repo is intended to store all the archive codes and part of the results of 
 
 
 
-<<<<<<< HEAD
 **NOTE**
 
 I decided not to upload the results and the explanation PDF files because the paper is not submitted yet. I will upload these before the final publication. (Currently they're at the local repository but I haven't yet ``add``/``commit``/``push``'ed.)
 
-
-
-=======
->>>>>>> 4dc906bf8358047d80bbc9c69e47a2b2e1b3fbea
 ## Notebooks
 
 Notebooks are made to give you how I reduced the data.
