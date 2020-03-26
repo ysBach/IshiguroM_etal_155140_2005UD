@@ -14,10 +14,10 @@ Note, however, that because I am not a well trained coder, it's messy. Especiall
 
 | Notebook                | Explanations                                                 | link                                                         |
 | ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ``Reducer``             | preprocessing, CR rejection, and WCS implementation.         | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/Reducer.ipynb) |
-| ``Photometer``          | ephemerides/PS1 query, centroid stars, Pillbox Aperture photometry, zeropoint fitting, target Circular Aperture photometry, standardization, and reduced magnitude calculation. | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/Photometer.ipynb) |
-| ``latex_generator``     | To automatically generate the LaTeX report file              | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/latex_generator.ipynb) |
-| ``light_curve_plotter`` | Simple plotting                                              | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/light_curve_plotter.ipynb) |
+| ``Reducer``             | preprocessing, CR rejection, and WCS implementation.         | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/photometry/Reducer.ipynb) |
+| ``Photometer``          | ephemerides/PS1 query, centroid stars, Pillbox Aperture photometry, zeropoint fitting, target Circular Aperture photometry, standardization, and reduced magnitude calculation. | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/photometry/Photometer.ipynb) |
+| ``latex_generator``     | To automatically generate the LaTeX report file              | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/photometry/latex_generator.ipynb) |
+| ``light_curve_plotter`` | Simple plotting                                              | [link](https://nbviewer.jupyter.org/github/ysBach/IshiguroM_etal_155140_2005UD/blob/master/photometry/light_curve_plotter.ipynb) |
 
 
 
