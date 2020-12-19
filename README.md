@@ -13,5 +13,5 @@ Each directory has its own README.
 
 ## Timeline of the Paper
 
-* 2020-02-xx: Submitted
+* 2020-12-xx: Submitted
 * 
