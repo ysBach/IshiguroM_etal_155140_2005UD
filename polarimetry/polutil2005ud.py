@@ -3,6 +3,10 @@ from pathlib import Path
 import numba as nb
 import numpy as np
 import pandas as pd
+from astropy.time import Time
+from scipy.optimize import curve_fit
+
+import ysvisutilpy2005ud as yvu
 
 PI = np.pi
 D2R = PI / 180
@@ -11,25 +15,107 @@ DATAPATH = Path('data')
 SAVEPATH = Path('figs')
 SAVEPATH.mkdir(exist_ok=True)
 
+# ********************************************************************************************************** #
+# *                                      COMBINE MSI AND DEVOGELE DATA                                     * #
+# ********************************************************************************************************** #
 dats = pd.read_csv(DATAPATH/"pol_ud_data.csv", sep=',')
 dats.insert(loc=7, column="dPr", value=dats["dP"])
+
+dat2 = pd.read_csv(DATAPATH/"2020PSJ.....1...15D.csv")
+dat2 = dat2.loc[dat2["Facility"] == "Rozhen"]
+# Aggregate data into similar-phase-angle cases, and only save weighted averages of such bins.
+dates = Time(dat2["JD"], format="jd")
+ndat2 = dict(date=[], alpha=[], Pr=[], dPr=[])
+for center in [17, 24, 32]:
+    near_center = np.abs(dat2["PA"] - center) < 2
+    # print(dates[near_center].isot)
+    _dat = dat2[near_center]
+    _p = _dat["Pr"]
+    _dp = _dat["err_Pr"]
+    _isse = np.sum(1/_dp**2)  # Inverse Square Sum of Errors
+    ndat2["date"].append(Time(np.median(dates[near_center].jd), format='jd').strftime("%Y-%m-%d"))
+    ndat2["alpha"].append(np.median(_dat["PA"]))
+    ndat2["Pr"].append(np.sum(_p/_dp**2)/_isse)
+    ndat2["dPr"].append(1/np.sqrt(_isse))
+
+ndat2 = pd.DataFrame.from_dict(ndat2)
+ndat2["obs"] = "FoReRo2"
+
+# Merge two
+dats = pd.concat([dats, ndat2])
+
 # dats["dPr"] = np.max(np.array([dats["Pr"]*0.05, [0.1]*len(dats), dats["dPr"]]).T, axis=1)
 dats = dats[dats["dPr"] < 10]
+
 dats = dats.sort_values("alpha")
 dats = dats.reset_index(drop=True)
 
-alpha = dats["alpha"].to_numpy()
-polr = dats["Pr"].to_numpy()
-dpolr = dats["dPr"].to_numpy()
+# ---------------------------------------------------------------------------------------------------------- #
+
+# ********************************************************************************************************** #
+# *                         MAKE THE DATAFRAME FOR OTHER ASTEROIDS (BIN WITH ALPHA)                        * #
+# ********************************************************************************************************** #
+
+_dat_ast = pd.read_csv("data/pol_data_other_asteroids.csv")
+_dat_ast = _dat_ast.loc[(_dat_ast["filter"].isin(["0.65", "0.68"]))
+                        | (_dat_ast["filter"].str.startswith("R"))]
+_dats_ast = dict(label=[], midjd=[], alpha=[], Pr=[], dPr=[], filter=[], reference=[])
+
+_dat_g = _dat_ast.groupby(["label", "reference", "filter"])
+for (label, reference, filt), df in _dat_g:
+    datetime = Time((df["date"].astype(str) + "T" + df["middletime"].astype(str)).tolist(), format="isot")
+    df["jd"] = datetime.jd
+    dt = np.ediff1d(datetime.jd)
+    idxs = np.where(dt > 0.1)[0]  # indices where more then sudden time gap of 0.1+ days
+    if len(idxs) > 0:
+        idxs = [0] + list(np.where(dt > 0.1)[0] + 1)
+        if idxs[-1] != len(df):
+            idxs += [None]  # select until the end of the list
+        for k in range(len(idxs) - 1):  # Chunking into alpha bin
+            sl = slice(idxs[k], idxs[k + 1], None)
+            df_k = df[sl]
+            _p = df_k["value"]
+            _dp = df_k["value_err"]
+            _isse = np.sum(1/_dp**2)  # Inverse Square Sum of Errors
+            _dats_ast['label'].append(label)
+            _dats_ast["reference"].append(reference)
+            _dats_ast["filter"].append(filt)
+            _dats_ast['midjd'].append(np.median(df_k['jd']))
+            _dats_ast['alpha'].append(np.median(df_k['alpha']))
+            _dats_ast["Pr"].append(np.sum(_p/_dp**2)/_isse)
+            _dats_ast["dPr"].append(1/np.sqrt(_isse))
+    else:  # single data point
+        _dats_ast['label'].append(label)
+        _dats_ast["reference"].append(reference)
+        _dats_ast["filter"].append(filt)
+        _dats_ast['midjd'].append(df['jd'])
+        _dats_ast['alpha'].append(df['alpha'])
+        _dats_ast["Pr"].append(df["value"])
+        _dats_ast["dPr"].append(df["value_err"])
+
+dats_ast = pd.DataFrame.from_dict(_dats_ast)
+# ---------------------------------------------------------------------------------------------------------- #
+
+# ********************************************************************************************************** #
+# *                                      EXTRACT DATA FOR CONVENIENCE                                      * #
+# ********************************************************************************************************** #
+alpha = dats["alpha"].to_numpy().astype(float)
+polr = dats["Pr"].to_numpy().astype(float)
+dpolr = dats["dPr"].to_numpy().astype(float)
 
 dats_msi = dats[dats["obs"] == 'MSI']
 dats_oth = dats[dats["obs"] != 'MSI']
-alpha_msi = dats_msi["alpha"].to_numpy()
-alpha_oth = dats_oth["alpha"].to_numpy()
-polr_msi = dats_msi["Pr"].to_numpy()
-polr_oth = dats_oth["Pr"].to_numpy()
-dpolr_msi = dats_msi["dPr"].to_numpy()
-dpolr_oth = dats_oth["dPr"].to_numpy()
+alpha_msi = dats_msi["alpha"].to_numpy().astype(float)
+alpha_oth = dats_oth["alpha"].to_numpy().astype(float)
+polr_msi = dats_msi["Pr"].to_numpy().astype(float)
+polr_oth = dats_oth["Pr"].to_numpy().astype(float)
+dpolr_msi = dats_msi["dPr"].to_numpy().astype(float)
+dpolr_oth = dats_oth["dPr"].to_numpy().astype(float)
+# ---------------------------------------------------------------------------------------------------------- #
+
+# ********************************************************************************************************** #
+# *                       DEFINE PARAM CLASS AND DEFINE FUNCTION-DEPENDENT VARIABLES                       * #
+# ********************************************************************************************************** #
 
 
 class Param:
@@ -60,9 +146,12 @@ pars_trigp_f = dict(
 pars_shesp = dict(
     h=Param('h', 1.e-2, 1.e+1, 0.1),
     a0=Param('a0', 10, 30, 20),
-    k1=Param('k1', 1.e-8, 1., 0.001),
-    k2=Param('k2', 1.e-8, 1., 1.e-5),
-    k0=Param('k0', 1.e-8, 1., 1.e-5)
+    k1=Param('k1', -1., 1., 0.001),
+    k2=Param('k2', -1., 1., 1.e-5),
+    k0=Param('k0', -1., 1., 1.e-5)
+    #    k1=Param('k1', 1.e-8, 1., 0.001),
+    #    k2=Param('k2', 1.e-8, 1., 1.e-5),
+    #    k0=Param('k0', 1.e-8, 1., 1.e-5)
 )
 
 pars_appsp = dict(
@@ -98,24 +187,76 @@ bounds_sgbip = (tuple([p.low for p in pars_sgbip.values()]),
 pars = dict(trigp_b=pars_trigp_b, trigp_f=pars_trigp_f, shesp=pars_shesp, appsp=pars_appsp, sgbip=pars_sgbip)
 p0 = dict(trigp_b=p0_trigp_b, trigp_f=p0_trigp_f, shesp=p0_shesp, appsp=p0_appsp, sgbip=p0_sgbip)
 bounds = dict(trigp_b=bounds_trigp_b, trigp_f=bounds_trigp_f, shesp=bounds_shesp, appsp=bounds_appsp, sgbip=bounds_sgbip)
+# ---------------------------------------------------------------------------------------------------------- #
 
 
-@nb.njit  # (parallel=True)
-def cos_deg(x):
-    return np.cos(x * D2R)
+def cfit_pol(fitfunc, funcname, df, xname="alpha", yname="Pr", dyname="dPr", use_error=True,
+             absolute_sigma=True, full=True):
+    ''' Convenience function for the curve fitting.
+    Parameters
+    ----------
+    fitfunc : function object
+        One of the functions defined below in this script file.
+
+    '''
+    _pars = pars[funcname]
+    _p0 = p0[funcname]  # initial values for the function fit
+    _bounds = bounds[funcname]  # lower and upper bounds for each paramters
+    _cfit_kw = dict(p0=_p0, bounds=_bounds, absolute_sigma=absolute_sigma)
+    # Find the least-squares solution
+    xdata = df[xname].to_numpy().astype(float)
+    ydata = df[yname].to_numpy().astype(float)
+    sigma = df[dyname].to_numpy().astype(float) if use_error else None
+    popt, pcov = curve_fit(fitfunc, xdata, ydata, sigma=sigma, **_cfit_kw)
+
+    if full:
+        data = dict(x=xdata, y=ydata, dy=sigma)
+        res = dict(pars=_pars, p0=_p0, bounds=_bounds, cfit_kw=_cfit_kw)
+        return popt, pcov, data, res
+    else:
+        return popt, pcov
 
 
-@nb.njit  # (parallel=True)
-def sin_deg(x):
-    return np.sin(x * D2R)
+def _listify(x):
+    ''' A very simple function to turn str, int, float to list while list, tuple, ndarray to list.
+    Other data types are not expected (no need to make such complicated function for here...)
+    '''
+    if not isinstance(x, (tuple, list, np.ndarray)):
+        x = [x]
+    else:
+        x = list(x)
+    return x
 
+
+def plot_data(axs, xlims=[(0, 160), (0, 35)], ylims=[(-5, 65), (-3, 4)],
+              xmajlockws=[20, 10], xminlockws=[10, 5], ymajlockws=[10, 1], yminlockws=[5, 0.5],
+              mkw_msi=dict(color='r', marker='o', ms=4, label="MSI"),
+              mkw_oth=dict(color='g', marker='o', ms=4, mfc='none', label="Others"),
+              errb_kw=dict(capsize=0, elinewidth=1, ls='')):
+    ''' Utility for plotting data
+    axs must be in order of ``(Axes for full data, Axes for negative branch)``.
+    '''
+    for i, ax in enumerate(axs.flat):
+        ax.errorbar(alpha_msi, polr_msi, dpolr_msi, **errb_kw, **mkw_msi)
+        ax.errorbar(alpha_oth, polr_oth, dpolr_oth, **errb_kw, **mkw_oth)
+        ax.set(xlabel="Phase angle [˚]", ylabel=r"$ P_\mathrm{r} $ [%]")
+        ax.axhline(0, color='k', ls=':')
+        ax.set(xlim=xlims[i], ylim=ylims[i])
+        yvu.linticker(ax,
+                      xmajlockws=xmajlockws[i], xminlockws=xminlockws[i],
+                      ymajlockws=ymajlockws[i], yminlockws=yminlockws[i])
+
+
+# ********************************************************************************************************** #
+# *                                 TRIGONOMETRIC FUNCTION (LUMME-MUINONEN)                                * #
+# ********************************************************************************************************** #
 
 def trigp(x, h=p0['trigp_b'][0], a0=p0['trigp_b'][1], c1=p0['trigp_b'][2], c2=p0['trigp_b'][3]):
     ''' Lumme-Muinonen function in pure python mode.
     '''
-    term1 = (sin_deg(x) / sin_deg(a0))**c1
-    term2 = (cos_deg(x / 2) / cos_deg(a0 / 2))**c2
-    term3 = sin_deg(x - a0)
+    term1 = (np.sin(x*D2R) / np.sin(a0*D2R))**c1
+    term2 = (np.cos(x/2*D2R) / np.cos(a0/2*D2R))**c2
+    term3 = np.sin((x - a0)*D2R)
     Pr = h / D2R * term1 * term2 * term3
     return Pr
 
@@ -124,9 +265,9 @@ def trigp(x, h=p0['trigp_b'][0], a0=p0['trigp_b'][1], c1=p0['trigp_b'][2], c2=p0
 def _nb_trigp(x, h=p0['trigp_b'][0], a0=p0['trigp_b'][1], c1=p0['trigp_b'][2], c2=p0['trigp_b'][3]):
     ''' Lumme-Muinonen function in numba mode.
     '''
-    term1 = (sin_deg(x) / sin_deg(a0))**c1
-    term2 = (cos_deg(x / 2) / cos_deg(a0 / 2))**c2
-    term3 = sin_deg(x - a0)
+    term1 = (np.sin(x*D2R) / np.sin(a0*D2R))**c1
+    term2 = (np.cos(x/2*D2R) / np.cos(a0/2*D2R))**c2
+    term3 = np.sin((x - a0)*D2R)
     Pr = h / D2R * term1 * term2 * term3
     return Pr
 
@@ -464,5 +605,3 @@ def sgbip_max(xx, h=p0['sgbip'][0], a0=p0['sgbip'][1], kn=p0['sgbip'][2], kp=p0[
         else:
             break
     return (xx[i - 1], maximum)
-
-
