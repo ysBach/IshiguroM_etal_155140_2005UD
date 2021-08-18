@@ -13,5 +13,6 @@ Each directory has its own README.
 
 ## Timeline of the Paper
 
-* 2021-06-xx: Submitted
-* 
+* 2021-06-08: Submitted to MNRAS
+* 2021-07-08: Referee report (1st)
+* 2021-08-xx: Resubmission to MNRAS
