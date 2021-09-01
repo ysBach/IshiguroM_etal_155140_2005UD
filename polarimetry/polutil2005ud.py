@@ -46,7 +46,12 @@ dats = pd.concat([dats, ndat2])
 ######################################################
 
 # dats["dPr"] = np.max(np.array([dats["Pr"]*0.05, [0.1]*len(dats), dats["dPr"]]).T, axis=1)
-dats = dats[dats["dPr"] < 10]
+# dats = dats[dats["dPr"] < 10]
+
+#dats = dats[dats["alpha"] < 45].copy()
+# Uncomment the above line to see how the results change if we restrict to use data of alpha < 45 degrees. 
+# We find virtually no change in important parameters (α0, Pmin, αmin, h), 
+# but the extrapolation values (αmax, Pmax) may change abruptly especially for the unbound cases.
 
 dats = dats.sort_values("alpha")
 dats = dats.reset_index(drop=True)
