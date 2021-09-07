@@ -6,6 +6,7 @@ It consists of
 
 1. [photometry/](photometry/) directory, containing all the codes for photometric data reduction.
 2. [polarimetry/](polarimetry/) directory, containing the codes for polarimetric data analysis (including MCMC).
+3. [MIS_NOT/](MSI_NOT) directory, containing the polarimetric data reduction codes prepared by Jooyeon Geem (@Geemjy)
 
 Each directory has its own README.
 
