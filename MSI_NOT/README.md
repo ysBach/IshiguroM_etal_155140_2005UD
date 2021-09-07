@@ -9,6 +9,7 @@ Here, we provide the code that we used to derive polarimetric results in Ishigur
 |[``NOT_Polarimetric_Analysis.py``](NOT_Polarimetric_Analysis.py)|The code to do aperture photometry and derive the stokes parameter from Data taken by ALFOSC+FAPOL at NOT.|
 |[``NOT_Subtract.py``](NOT_Subtract.py)|The code to do the subtraction technique which removes the nearby stars and the background's gradient in data taken by NOT. This technique is **used only for ALFOSC's data taken at 2018 Sep 12 and 19**.|
 |[``result_quplane/``](result_quplane/)| The directory contains the results of NO and NOT as a qu-plane image.|
+|[``result_csv/``](result_csv/)| Result files from polarimetry. |
 
 The polarimetric data is available in Zenodo. 
 
