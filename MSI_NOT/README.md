@@ -96,7 +96,7 @@ Let me take the MSI's data taken at 20180925 as an example.
     
 
 
-## Out-put
+## Output Files
 When you run the script you will get two files (``result_Photo_XXXX.csv`` and ``result_Pol_XXXX.csv`` where XXXX is the observation date).
 
 Each csv file contains the photometric result of each image and the polarimetric result of each set.
