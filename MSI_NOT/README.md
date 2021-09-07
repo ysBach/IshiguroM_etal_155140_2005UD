@@ -104,52 +104,52 @@ The header information is below.
     
 
 ### ``result_Photo_<ObservationDate>.csv``
-|Header Keyword   |Unit|Explanation|
+|Column   |Unit|Explanation|
 | ----------------- |---| --------------- |
 |Object Filename| ... |Name of FITS file|
-|set| ... | Set number|
-|TIME| ... | Mid-point of exposure in UT|
-|JD| ... |Mid-point of exposure in JD|
-|HWPANG|deg|Retarder Plate Angle |
-|FWHM_o|pixel|FWHM of the ordinary component|
-|FWHM_e|pixel|FWHM of the extra-ordinary component|
-|EXP [s]|second|Exposure time|
-|Aper [pix]|pixel|Aperture radius|
-|Ann|pixel|Inner circle radius of the annulus|
-|Ann_out|pixel|Outher circle radius of the annulus|
-|Flux_o|e-|Sum of flux within the aperture of the ordinary component|
-|eFLux_o|e-|Error of Flux_o|
-|Flux_e|e-|Sum of flux within the aperture of the extra-ordinary component|
-|eFLux_e|e-|Error of Flux_e|
-|Sky_o|e-|Background value around the ordinary component|
-|eSky_o|e-|Error of Sky_o|
-|Sky_e|e-|Background value around the extra-ordinary component|
-|eSky_e|e-|Error of Sky_e|
-|SNR_o|...|SNR of the ordinary component|
-|SNR_e|...|SNR of the extra-ordinary component|
+|``set``| ... | Set number|
+|``TIME``| ... | Mid-point of exposure in UT|
+|``JD``| ... |Mid-point of exposure in JD|
+|``HWPANG``|deg|Retarder Plate Angle |
+|``FWHM_o``|pixel|FWHM of the ordinary component|
+|``FWHM_e``|pixel|FWHM of the extra-ordinary component|
+|``EXP [s]``|second|Exposure time|
+|``Aper [pix]``|pixel|Aperture radius|
+|``Ann``|pixel|Inner circle radius of the annulus|
+|``Ann_out``|pixel|Outher circle radius of the annulus|
+|``Flux_o``|e-|Sum of flux within the aperture of the ordinary component|
+|``eFLux_o``|e-|Error of Flux_o|
+|``Flux_e``|e-|Sum of flux within the aperture of the extra-ordinary component|
+|``eFLux_e``|e-|Error of Flux_e|
+|``Sky_o``|e-|Background value around the ordinary component|
+|``eSky_o``|e-|Error of Sky_o|
+|``Sky_e``|e-|Background value around the extra-ordinary component|
+|``eSky_e``|e-|Error of Sky_e|
+|``SNR_o``|...|SNR of the ordinary component|
+|``SNR_e``|...|SNR of the extra-ordinary component|
 
 ​    
 
 ### ``result_Pol_<ObservationDate>.csv``
-|Header Keyword   |Unit|Explanation|    
+|Header Keyword   |Unit|Explanation|
 | :----------------- |---| --------------- |
-|filename|...|Name of FITS file|
-|JD|...|Mid-point of set in JD|
-|alpha [deg]|deg|Average phase angle of set|
-|PsANG [deg]|deg|Average position angle of the scattering plane of set|
-|q|...|q of the Stokes parameters|
-|u|...|u of the Stokes parameters|
-|ran_q|...|Random error of q|
-|ran_u|...|Random error of u|
-|sys_q|...|Systemic error of q|
-|sys_u|...|Systemic error of u|
-|P|...|Linear polarization degree|
-|eP|...|Error of P|
-|Pr|...|Polarisation degree referring to the scattering plane|
-|theta|deg|Positino angle|
-|theta_r|deg|Position angle referring to the scattering plane|
-|eTheta|deg|Error of theta|
-|Aper_radius [pix]|pixel|Aperture radius|
+|``filename``|...|Name of FITS file|
+|``JD``|...|Mid-point of set in JD|
+|``alpha [deg]``|deg|Average phase angle of set|
+|``PsANG [deg]``|deg|Average position angle of the scattering plane of set|
+|``q``|...|q of the Stokes parameters|
+|``u``|...|u of the Stokes parameters|
+|``ran_q``|...|Random error of q|
+|``ran_u``|...|Random error of u|
+|``sys_q``|...|Systemic error of q|
+|``sys_u``|...|Systemic error of u|
+|``P``|...|Linear polarization degree|
+|``eP``|...|Error of P|
+|``Pr``|...|Polarisation degree referring to the scattering plane|
+|``theta``|deg|Positino angle|
+|``theta_r``|deg|Position angle referring to the scattering plane|
+|``eTheta``|deg|Error of theta|
+|``Aper_radius [pix]``|pixel|Aperture radius|
 
 
 ​    
@@ -159,3 +159,4 @@ Created by Jooyeon Geem. - If you have any questions, please feel free to contac
 
 The data reduction pipeline of MSI will continue to be developed in [@Geemjy](https://github.com/Geemjy) in the future.
 
+``
