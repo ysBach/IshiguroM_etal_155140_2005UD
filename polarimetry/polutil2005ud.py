@@ -48,9 +48,9 @@ dats = pd.concat([dats, ndat2])
 # dats["dPr"] = np.max(np.array([dats["Pr"]*0.05, [0.1]*len(dats), dats["dPr"]]).T, axis=1)
 # dats = dats[dats["dPr"] < 10]
 
-#dats = dats[dats["alpha"] < 45].copy()
-# Uncomment the above line to see how the results change if we restrict to use data of alpha < 45 degrees. 
-# We find virtually no change in important parameters (α0, Pmin, αmin, h), 
+# dats = dats[dats["alpha"] < 45].copy()
+# Uncomment the above line to see how the results change if we restrict to use data of alpha < 45 degrees.
+# We find virtually no change in important parameters (α0, Pmin, αmin, h),
 # but the extrapolation values (αmax, Pmax) may change abruptly especially for the unbound cases.
 
 dats = dats.sort_values("alpha")
@@ -149,12 +149,18 @@ pars_trigp_f = dict(
     c2=Param('c2', -1.e+1, 1.e+1, 1)
 )
 
+pars_linexp = dict(
+    h=Param('h', 1.e-2, 1.e+1, 0.1),
+    a0=Param('a0', 10, 30, 20),
+    k=Param("k", 1.e-5, 100, 1.)
+)
+
 pars_shesp = dict(
     h=Param('h', 1.e-2, 1.e+1, 0.1),
     a0=Param('a0', 10, 30, 20),
     k1=Param('k1', -1., 1., 0.001),
-    k2=Param('k2', -1., 1., 1.e-5),
-    k0=Param('k0', -1., 1., 1.e-5)
+    k2=Param('k2', -10., 10., 1.e-5),
+    k0=Param('k0', -10., 10., 1.e-5)
     #    k1=Param('k1', 1.e-8, 1., 0.001),
     #    k2=Param('k2', 1.e-8, 1., 1.e-5),
     #    k0=Param('k0', 1.e-8, 1., 1.e-5)
@@ -175,6 +181,7 @@ pars_sgbip = dict(
 
 p0_trigp_b = tuple([p.p0 for p in pars_trigp_b.values()])
 p0_trigp_f = tuple([p.p0 for p in pars_trigp_f.values()])
+p0_linexp = tuple([p.p0 for p in pars_linexp.values()])
 p0_shesp = tuple([p.p0 for p in pars_shesp.values()])
 p0_appsp = tuple([p.p0 for p in pars_appsp.values()])
 p0_sgbip = tuple([p.p0 for p in pars_sgbip.values()])
@@ -183,6 +190,8 @@ bounds_trigp_b = (tuple([p.low for p in pars_trigp_b.values()]),
                   tuple([p.upp for p in pars_trigp_b.values()]))
 bounds_trigp_f = (tuple([p.low for p in pars_trigp_f.values()]),
                   tuple([p.upp for p in pars_trigp_f.values()]))
+bounds_linexp = (tuple([p.low for p in pars_linexp.values()]),
+                 tuple([p.upp for p in pars_linexp.values()]))
 bounds_shesp = (tuple([p.low for p in pars_shesp.values()]),
                 tuple([p.upp for p in pars_shesp.values()]))
 bounds_appsp = (tuple([p.low for p in pars_appsp.values()]),
@@ -190,9 +199,12 @@ bounds_appsp = (tuple([p.low for p in pars_appsp.values()]),
 bounds_sgbip = (tuple([p.low for p in pars_sgbip.values()]),
                 tuple([p.upp for p in pars_sgbip.values()]))
 
-pars = dict(trigp_b=pars_trigp_b, trigp_f=pars_trigp_f, shesp=pars_shesp, appsp=pars_appsp, sgbip=pars_sgbip)
-p0 = dict(trigp_b=p0_trigp_b, trigp_f=p0_trigp_f, shesp=p0_shesp, appsp=p0_appsp, sgbip=p0_sgbip)
-bounds = dict(trigp_b=bounds_trigp_b, trigp_f=bounds_trigp_f, shesp=bounds_shesp, appsp=bounds_appsp, sgbip=bounds_sgbip)
+pars = dict(trigp_b=pars_trigp_b, trigp_f=pars_trigp_f, linexp=pars_linexp,
+            shesp=pars_shesp, appsp=pars_appsp, sgbip=pars_sgbip)
+p0 = dict(trigp_b=p0_trigp_b, trigp_f=p0_trigp_f, linexp=p0_linexp,
+          shesp=p0_shesp, appsp=p0_appsp, sgbip=p0_sgbip)
+bounds = dict(trigp_b=bounds_trigp_b, trigp_f=bounds_trigp_f, linexp=bounds_linexp,
+              shesp=bounds_shesp, appsp=bounds_appsp, sgbip=bounds_sgbip)
 # ---------------------------------------------------------------------------------------------------------- #
 
 
@@ -342,6 +354,87 @@ def trigp_max(xx, h=p0['trigp_b'][0], a0=p0['trigp_b'][1], c1=p0['trigp_b'][2], 
 
 
 # ********************************************************************************************************** #
+# *                                       LINEAR-EXPONENTIAL FUNCTION                                      * #
+# ********************************************************************************************************** #
+
+def linexp(x, h=p0['linexp'][0], a0=p0['linexp'][1], k=p0['linexp'][2]):
+    ''' Lumme-Muinonen function in pure python mode.
+    '''
+    term1 = 1 - (1 + k*x*np.exp(-k*(a0-x)))*np.exp(-k*x)
+    term2 = 1 - (1 + k*a0)*np.exp(-k*a0)
+    Pr = h*(x - a0*term1/term2)
+    return Pr
+
+
+@nb.njit  # (parallel=True)
+def _nb_linexp(x, h=p0['linexp'][0], a0=p0['linexp'][1], k=p0['linexp'][2]):
+    ''' Linear-exponential function in numba mode.
+    '''
+    term1 = 1 - (1 + k*x*np.exp(-k*(a0-x)))*np.exp(-k*x)
+    term2 = 1 - (1 + k*a0)*np.exp(-k*a0)
+    Pr = h*(x - a0*term1/term2)
+    return Pr
+
+
+@nb.njit(parallel=True)
+def do_linexp(x, y, yerr, arr_h, arr_a0, arr_k, arr_chi2, arr_amax,
+              arr_Pmax, arr_amin, arr_Pmin):
+    ''' To calculate everything needed for the analysis.
+    Parameters
+    ----------
+    x, y, yerr : array-like
+        The phase angle [˚], Pr [%], and dPr [%].
+    arr_h, arr_c1, arr_a0 : array-like
+        The ``trace``d arrays of the three parameters of linear-exponential function from pymc3.
+    arr_chi2, arr_amax, arr_Pmax, arr_amin, arr_Pmin : array-like
+        The empty arrays of chi-square, min/max phase angle (``a``) and the polarization degree
+        (``P``). Must have the same length as the arrays given above. (It will not give error if these
+        are longer than the above ones, but...)
+    '''
+    xx_min = np.arange(2, 15, 0.01)
+    xx_max = np.arange(80, 140, 0.01)
+
+    for i in nb.prange(arr_h.shape[0]):
+        h = arr_h[i]
+        a0 = arr_a0[i]
+        k = arr_k[i]
+        resid = y - _nb_linexp(x, h=h, a0=a0, k=k)
+        chi2 = np.sum((resid / yerr)**2)
+        amax, Pmax = linexp_max(xx_max, h=h, a0=a0, k=k)
+        amin, Pmin = linexp_min(xx_min, h=h, a0=a0, k=k)
+
+        arr_chi2[i] = chi2
+        arr_amax[i] = amax
+        arr_Pmax[i] = Pmax
+        arr_amin[i] = amin
+        arr_Pmin[i] = Pmin
+
+
+@nb.njit  # (parallel=True)
+def linexp_min(xx, h=p0['linexp'][0], a0=p0['linexp'][1], k=p0['linexp'][2]):
+    """ Calculates the minimum phase angle/P degree from given parameters.
+    """
+    b = h*a0/(1 - (1 + k*a0)*np.exp(-k*a0))
+    c = h + k*b*np.exp(-k*a0)
+    amin = 1/k * np.log(k*b/c)
+    return (amin, _nb_linexp(amin, h=h, a0=a0, k=k))
+
+
+@nb.njit  # (parallel=True)
+def linexp_max(xx, h=p0['linexp'][0], a0=p0['linexp'][1], k=p0['linexp'][2]):
+    """ Calculates the maximum phase angle/P degree from given parameters.
+    """
+    maximum = -1
+    for i in range(xx.shape[0]):
+        p = _nb_linexp(xx[i], h, a0, k)
+        if p > maximum:
+            maximum = p
+        else:
+            break
+    return (xx[i - 1], maximum)
+
+
+# ********************************************************************************************************** #
 # *                                      SHESTOPALOV FUNCTION -- FULL                                      * #
 # ********************************************************************************************************** #
 
@@ -351,7 +444,10 @@ def shesp(x, h=p0['shesp'][0], a0=p0['shesp'][1], k1=p0['shesp'][2], k2=p0['shes
     '''
     term1 = (1 - np.exp(-k1*x))/(1 - np.exp(-k1*a0))
     term2 = (1 - np.exp(-k0*(x - a0)))/k0
-    term3 = (1 - np.exp(-k2*(x - 180)))/(1 - np.exp(-k2*(a0 - 180)))
+    term3 = (x - 180)/(a0 - 180)
+    # term3 = np.cos(x/2)
+    # term3 = 1/(1+np.exp((x-90)*k2))
+    # term3 = (1 - np.exp(-k2*(x - 180)))/(1 - np.exp(-k2*(a0 - 180)))
     # No D2R needed for h because term1*term2*term3 has unit of [deg] so h is already %/deg.
     Pr = h*term1*term2*term3
     return Pr
@@ -363,7 +459,10 @@ def _nb_shesp(x, h=p0['shesp'][0], a0=p0['shesp'][1], k1=p0['shesp'][2], k2=p0['
     '''
     term1 = (1 - np.exp(-k1*x))/(1 - np.exp(-k1*a0))
     term2 = (1 - np.exp(-k0*(x - a0)))/k0
-    term3 = (1 - np.exp(-k2*(x - 180)))/(1 - np.exp(-k2*(a0 - 180)))
+    term3 = (x - 180)/(a0 - 180)
+    # term3 = np.cos(x/2)
+    # term3 = 1/(1+np.exp((x-90)*k2))
+    # term3 = (1 - np.exp(-k2*(x - 180)))/(1 - np.exp(-k2*(a0 - 180)))
     # No D2R needed for h because term1*term2*term3 has unit of [deg] so h is already %/deg.
     Pr = h*term1*term2*term3
     return Pr
