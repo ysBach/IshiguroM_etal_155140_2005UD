@@ -81,6 +81,36 @@ The following files
 
 
 
+## Original Script in the Older Draft of the Paper
+
+In the original draft of our paper, we had the following explanation on our photometry, but it was removed over time (as it was too much for this paper). 
+
+<details><summary>click to see</summary>
+The photometric data were preprocessed in the standard manner for CCD data. The original object images were bias- and dark-subtracted and flat-fielded using the dome flat. The cosmic ray was then removed using the L. A. Cosmic algorithm \citep{2001PASP..113.1420V} implemented by \texttt{astroscrappy}\footnote{\url{https://github.com/astropy/astroscrappy} version 1.0.8 with a separable median filter, which is not available in the original \texttt{L. A. Cosmic} algorithm but accelerates the cosmic ray rejection calculation by more than an order of magnitude, with specifically tuned parameters.}. Then, the World Coordinate System (WCS) information was appended in each image header by the offline version of \texttt{astrometry.net} \citep{2010AJ....139.1782L}.
+After preprocessing, we queried the Pan-STARRS1 DR1 (hereafter DR1) catalog \citep{2016arXiv161205243F} $ r $ magnitude in the range between 10.0 and 15.2 mag, and toggled flags if there were DR1-cataloged objects near the target asteroid to avoid contamination of photometric signal of the asteroid. In addition, we discarded the extracted objects from the DR1 catalog if any pairs of stars were close to each. We only selected objects that were (1) not recognized as quasar, galaxy, or variables based on DR1 catalog's flags and (2) observed several times in the shorter wavelengths (at least three times for the $g$- and $r$-band and once for the $i$-band). Finally, we were left with a minimum of 5 to a maximum of more than 20 stars in each image. The magnitudes of these stars were used for the photometric calibration as explained below.
+
+The aperture shape for each star is defined as a pill-box, a combination of a rectangle and two half-ellipses, similar to \texttt{TRIPPy} \citep{2016AJ....151..158F}. The height of the rectangle is where it faces the half-ellipses. The position angle of the aperture is obtained by fitting the 2-dimensional elliptical Gaussian to field stars with the initial guess from the ephemerides, and the sigma-clipped median of the angles of the field stars is used for the aperture position angles. After testing a number of combinations of the semi-major and minor axis lengths of the half-ellipses, we empirically determined the appropriate solution of half-circles with a radius $ 1.75F $, where $ F $ is the full-width at half-maximum (FWHM) of the point sources, to enclose a sufficient amount of the stellar signal even when the tracking accuracy of the telescope mount was not perfect. Therefore, the aperture was set as a combination of a rectangle with width $ L $, the expected trail length of the asteroid with respect to the field stars during the exposure time, retrieved from the ephemerides, and height $ 3.50 F $, with two half-circles with radius $ 1.75F $. The instrumental magnitude was then calculated by subtracting the sky value estimated from the locally defined pill-box annulus with inner and outer radii of $ 4F $ and $ 6F $, respectively, while keeping the same width ($L$) of the rectangle. For the asteroid, which is the target being tracked, we used a circular aperture of radius $2F$ and similarly selected the circular annulus with inner and outer radii of $ 4F $ and $ 6F $ to determine the local sky flux. Changing the sizes of the apertures affected the results only within much less than the estimated 1-$\sigma$ error bars.
+
+The magnitudes in DR1 were converted into Johnson--Cousins $R_\mathrm{C}$ magnitudes by the transformation formula given in \cite{2012ApJ...750...99T}. By using the instrumental and catalog magnitudes, we determined the photometric zero point at each image. The instrumental magnitudes were then converted to the standardized magnitude using the photometric zero point. We ignored the color-term for the atmospheric extinction, which appeared to be negligible based on the stars of $ 0 \lesssim g-r \lesssim 1 $ from our analysis (zero point slope $ \lesssim 0.05 $ for $ g-r $).
+
+% The below can be an item for discussion???
+%This would not be true especially at the airmass $ X \gtrsim 2 $. However, the scatter due to the low signal-to-noise (S/N) ratios for both the asteroid and field stars are more dominant than the color-dependent term; it is visible in Figure \ref{fig:lightcurve} with large scatter and large error-bars (e.g., the rotational phase $\sim 0.7 $ in 2018 October 13 data, where the airmass was as high as $ \sim 2.6 $).
+
+The observed $R_\mathrm{C}$ magnitudes were converted into reduced magnitudes (hypothetical magnitudes at the unit heliocentric distance of 1 au and the observer's distance of 1 au), which is given by,
+
+$$ m_\mathrm{R}(1,1,\alpha)=R - 5\log(r_\mathrm{h} \Delta) ~, $$
+
+\noindent where $r_\mathrm{h}$ and $\Delta$ are the heliocentric and the observer's distances in au at the epoch of our observation. Since our photometric data were taken at the opposition (i.e., $\alpha \sim 0^\circ$), we ignored the $\alpha$-dependency of the magnitude and derived the absolute magnitude $H_\mathrm{R} := m_\mathrm{R}(1,1,0)$ in $R_\mathrm{C}$-band. 
+%Note that the absolute magnitude is formally defined in $V$-band but we regard $H_\mathrm{V} = H_\mathrm{R}$
+To obtain the lightcurve, we further corrected the light time to take into account subtle rotation of the asteroid while light traveled to the observer's location.
+
+Finally, we visually inspected each image with the locations of photometric apertures to check if our photometric results were affected by unexpected problems (such as close encounters with background objects that are not listed in the DR1 or imperfect centering of objects due to the low S/N, etc.). Of 810 images, 41 images were discarded due to such unexpected problems. In the period analysis, data points with a large scatter (less than 10 data points) were automatically rejected.
+The source codes, script files, output files and ancillary explanations for the detailed algorithm for the photometric analyses, except for the period analysis, are publicly available via GitHub service\footnote{\url{https://github.com/ysBach/IshiguroM_etal_155140_2005UD/tree/master/photometry}, including the frozen snapshots of the dependent packages developed for our purpose (\texttt{ysfitsutilpy}, \texttt{ysphotutilpy}, and \texttt{SNUO1Mpy}).}.
+
+</details>
+
+
+
 ## Data Analysis Strategy
 
 1. **Centroiding**. I haven't yet found perfect algorithm to do centroiding, and I guess IRAF has some highly subjectively tuned internal algorithm for the centroiding which I haven't found. From short experience, I found elliptical Gaussian fitting for a centroid box of ``cbox = 8 * FWHM_initial_guess``. In this code, I did put ``mask = data < data.min() + 5*ssky``. For each iteration, new Gaussian fitting is done for ``cbox``-sized box, and the centroid position is updated. If the distance to the new centroid from the old one is larger than 1/2 FWHM, move only 1/2 FWHM to that direction. Halt the iteration when shift is << 1 pixel, and iteration is done up to 10 times only.
