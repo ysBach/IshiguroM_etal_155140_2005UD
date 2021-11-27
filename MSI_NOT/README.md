@@ -11,7 +11,11 @@ Here, we provide the code that we used to derive polarimetric results in Ishigur
 |[``result_quplane/``](result_quplane/)| The directory contains the results of NO and NOT as a qu-plane image.|
 |[``result_csv/``](result_csv/)| Result files from polarimetry. |
 
-The polarimetric data is available in Zenodo. 
+The polarimetric data is available in Zenodo (https://zenodo.org/record/5461099#.YZ2_91MzY3w).
+You can download the followings files at the link.
+1. MSI_2005UD.tar.gz: Zip file containing the images of 2005UD taken with MSI (a total of 1,673 images)
+2. msi181009_640355.fits: the sample image (one of the images contained in MSI_2005UD.tar.gz)
+
 
 
 
