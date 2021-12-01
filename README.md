@@ -7,7 +7,7 @@ It consists of
 
 1. [photometry/](photometry/) directory, containing all the codes for photometric data reduction.
 2. [polarimetry/](polarimetry/) directory, containing the codes for polarimetric data analysis (including MCMC).
-3. [MIS_NOT/](MSI_NOT) directory, containing the polarimetric data reduction codes prepared by Jooyeon Geem (@Geemjy)
+3. [MSI_NOT/](MSI_NOT) directory, containing the polarimetric data reduction codes prepared by Jooyeon Geem (@Geemjy)
 
 Each directory has its own README.
 
@@ -23,5 +23,5 @@ Each directory has its own README.
 * 2021-10-29: Resubmission to MNRAS
 * 2021-10-29: Accepted for publication to MNRAS
 * 2021-11-22: Proof arrived
-* 2021-11-24: Polarimetric data uploaded to Zenodo (See [MIS_NOT/](MSI_NOT))
+* 2021-11-24: Polarimetric data uploaded to Zenodo (See [MSI_NOT/](MSI_NOT))
 * 2021-11-24: Reply to the proof submitted to MNRAS
