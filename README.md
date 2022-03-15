@@ -1,5 +1,7 @@
 # (155140) 2005 UD
-* Publication: Ishiguro M., et al. 2022, MNRAS, 509, 4128
+* Publication: [Ishiguro M., et al. 2022, MNRAS, 509, 4128](https://academic.oup.com/mnras/article/509/3/4128/6424289?login=true)
+* ADS: [``2022MNRAS.509.4128I``](https://ui.adsabs.harvard.edu/abs/2022MNRAS.509.4128I/abstract)
+* DOI: [``10.1093/mnras/stab3198``](https://doi.org/10.1093/mnras/stab3198)
 
 This is a repository made by Yoonsoo P. Bach and Jooyeon Geem, co-authors of the paper, to archive the source codes, scripts, results, etc of data reduction & analysis of photometry & polarimetry, to guarantee the reproducibility.
 
