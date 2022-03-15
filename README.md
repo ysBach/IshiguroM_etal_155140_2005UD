@@ -1,5 +1,5 @@
 # (155140) 2005 UD
-* Publication: IshiguroM et al. (2021) MNRAS, in press
+* Publication: Ishiguro M., et al. 2022, MNRAS, 509, 4128
 
 This is a repository made by Yoonsoo P. Bach and Jooyeon Geem, co-authors of the paper, to archive the source codes, scripts, results, etc of data reduction & analysis of photometry & polarimetry, to guarantee the reproducibility.
 
